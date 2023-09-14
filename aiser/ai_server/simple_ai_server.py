@@ -1,8 +1,9 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from .ai_server import AiServer
 import asyncio
+from ..models.dtos import SemanticSearchRequest
 
 
 class SimpleAiServer(AiServer):
@@ -13,9 +14,12 @@ class SimpleAiServer(AiServer):
         async def version() -> str:
             return "0.1.0"
 
-        @app.get("/knowledge-base/{kb_id}")
-        async def knowledge_base(kb_id: str):
-            return {"message": "Hello World"}
+        @app.post("/knowledge-base/{kb_id}/semantic-search")
+        async def knowledge_base(kb_id: str, request: SemanticSearchRequest):
+            for kb in self._knowledge_bases:
+                if kb.id == kb_id:
+                    return kb.perform_semantic_search(query_text=request.query, desired_number_of_results=request.top_k)
+            raise HTTPException(status_code=404, detail="Knowledge base not found")
 
         async def stream_hello_world():
             message = 'hello world'
