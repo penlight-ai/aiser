@@ -7,6 +7,7 @@ setup(
     author='Penlight AI Inc.',
     author_email='support@penlight.ai',
     description='Python package to serve AI agents and knowledge bases for Penlight AI.',
+    long_description='Python package to serve AI agents and knowledge bases for Penlight AI.',
     packages=find_packages(),
     install_requires=[],
     license='Apache License 2.0',
