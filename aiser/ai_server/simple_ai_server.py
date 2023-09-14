@@ -9,6 +9,10 @@ class SimpleAiServer(AiServer):
     def _get_app(self) -> FastAPI:
         app = FastAPI()
 
+        @app.get("/version")
+        async def version() -> str:
+            return "0.1.0"
+
         @app.get("/knowledge-base/{kb_id}")
         async def knowledge_base(kb_id: str):
             return {"message": "Hello World"}
