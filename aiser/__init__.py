@@ -1,1 +1,1 @@
-from say_hello import say_hello
+from .ai_server import SimpleAiServer
