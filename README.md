@@ -1,1 +1,1 @@
-# AI API
+# ServAI

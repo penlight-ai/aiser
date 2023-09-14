@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='aiapi',
+    name='servai',
     version='0.1.0',
     url='https://github.com/penlight-ai/aiapi',
     author='Penlight AI Inc.',
