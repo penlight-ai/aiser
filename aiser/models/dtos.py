@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 import humps
 
 
@@ -11,6 +12,15 @@ class CamelCaseBaseModel(BaseModel):
 class SemanticSearchRequest(CamelCaseBaseModel):
     text: str
     num_results: int
+
+
+class SemanticSearchResultDto(CamelCaseBaseModel):
+    content: str
+    score: float
+
+
+class SemanticSearchResultResponseDto(CamelCaseBaseModel):
+    results: List[SemanticSearchResultDto]
 
 
 class ChatMessageDto(CamelCaseBaseModel):
