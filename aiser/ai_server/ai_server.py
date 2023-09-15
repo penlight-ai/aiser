@@ -1,13 +1,24 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from ..knowledge_base import KnowledgeBase
+from ..agent import Agent
 
 
 class AiServer(ABC):
-    def __init__(self, knowledge_bases: List[KnowledgeBase], port: int):
+    _knowledge_bases: List[KnowledgeBase]
+    _agents: List[Agent]
+    _port: int
+
+    def __init__(
+            self,
+            knowledge_bases: Optional[List[KnowledgeBase]] = None,
+            agents: Optional[List[Agent]] = None,
+            port: int = 5000,
+    ):
         super().__init__()
-        self._knowledge_bases = knowledge_bases
         self._port = port
+        self._knowledge_bases = [] if knowledge_bases is None else knowledge_bases
+        self._agents = [] if agents is None else agents
 
     @abstractmethod
     def run(self):

@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from .ai_server import AiServer
-import asyncio
-from ..models.dtos import SemanticSearchRequest
+from ..models.dtos import SemanticSearchRequest, AgentChatRequest
+from ..models import ChatMessage
 
 
 class SimpleAiServer(AiServer):
@@ -21,15 +21,15 @@ class SimpleAiServer(AiServer):
                     return kb.perform_semantic_search(query_text=request.query, desired_number_of_results=request.top_k)
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
-        async def stream_hello_world():
-            message = 'hello world'
-            for character in message:
-                await asyncio.sleep(0.1)
-                yield character
-
-        @app.get("/agent/{agent_id}/chat")
-        async def agent(agent_id: str):
-            return StreamingResponse(stream_hello_world(), media_type="text/event-stream")
+        @app.post("/agent/{agent_id}/chat")
+        async def agent_chat(agent_id: str, request: AgentChatRequest):
+            for agent in self._agents:
+                if agent.id == agent_id:
+                    return StreamingResponse(
+                        agent.reply(input_message=ChatMessage(text_content=request.input_message.text_content )),
+                        media_type="text/event-stream"
+                    )
+            raise HTTPException(status_code=404, detail="Agent not found")
 
         return app
 
