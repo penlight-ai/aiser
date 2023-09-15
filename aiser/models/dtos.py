@@ -1,14 +1,21 @@
 from pydantic import BaseModel
+import humps
 
 
-class SemanticSearchRequest(BaseModel):
-    query: str
-    top_k: int
+class CamelCaseBaseModel(BaseModel):
+    class Config:
+        alias_generator = humps.camelize
+        allow_population_by_field_name = True
 
 
-class ChatMessageDto(BaseModel):
+class SemanticSearchRequest(CamelCaseBaseModel):
+    text: str
+    num_results: int
+
+
+class ChatMessageDto(CamelCaseBaseModel):
     text_content: str
 
 
-class AgentChatRequest(BaseModel):
+class AgentChatRequest(CamelCaseBaseModel):
     input_message: ChatMessageDto

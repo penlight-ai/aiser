@@ -18,7 +18,10 @@ class SimpleAiServer(AiServer):
         async def knowledge_base(kb_id: str, request: SemanticSearchRequest):
             for kb in self._knowledge_bases:
                 if kb.id == kb_id:
-                    return kb.perform_semantic_search(query_text=request.query, desired_number_of_results=request.top_k)
+                    return kb.perform_semantic_search(
+                        query_text=request.text,
+                        desired_number_of_results=request.num_results
+                    )
             raise HTTPException(status_code=404, detail="Knowledge base not found")
 
         @app.post("/agent/{agent_id}/chat")
@@ -26,7 +29,7 @@ class SimpleAiServer(AiServer):
             for agent in self._agents:
                 if agent.id == agent_id:
                     return StreamingResponse(
-                        agent.reply(input_message=ChatMessage(text_content=request.input_message.text_content )),
+                        agent.reply(input_message=ChatMessage(text_content=request.input_message.text_content)),
                         media_type="text/event-stream"
                     )
             raise HTTPException(status_code=404, detail="Agent not found")
