@@ -8,7 +8,7 @@ from ..models import ChatMessage
 import typing
 
 
-class SimpleAiServer(AiServer):
+class RestAiServer(AiServer):
     def _get_app(self) -> FastAPI:
         app = FastAPI()
 

@@ -1,1 +1,1 @@
-from .simple_ai_server import SimpleAiServer
+from .rest_ai_server import RestAiServer

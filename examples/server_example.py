@@ -1,6 +1,6 @@
 from typing import List
 import typing
-from aiser import SimpleAiServer, KnowledgeBase, SemanticSearchResult, Agent
+from aiser import RestAiServer, KnowledgeBase, SemanticSearchResult, Agent
 from aiser.models import ChatMessage
 import asyncio
 
@@ -23,7 +23,7 @@ class AgentExample(Agent):
 
 
 if __name__ == '__main__':
-    server = SimpleAiServer(
+    server = RestAiServer(
         agents=[
             AgentExample(),
         ],
