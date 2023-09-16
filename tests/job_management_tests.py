@@ -101,6 +101,15 @@ class AsyncStartJobManagerTestCase(unittest.TestCase):
 
         self.loop.run_until_complete(run_test())
 
+    def test_job_should_be_removed_after_being_used_once(self):
+        async def run_test():
+            self.create_job_at_seconds(0.0)
+            _ = await self.manager.wait_for_job(job_id=self.job_id)
+            job_from_manager2 = await self.manager.wait_for_job(job_id=self.job_id)
+            self.assertIsNone(job_from_manager2)
+
+        self.loop.run_until_complete(run_test())
+
 
 if __name__ == '__main__':
     unittest.main()

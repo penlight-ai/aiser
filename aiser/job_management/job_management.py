@@ -42,7 +42,9 @@ class AsyncStartJobManager(typing.Generic[AsyncStartJobT]):
         while self._timer.get_time_in_seconds() - start_time < self._timeout_seconds:
             self.remove_old_jobs()
             if job_id in self._jobs:
-                return self._jobs[job_id]
+                job = self._jobs[job_id]
+                self._jobs.pop(job_id)
+                return job
             self._timer.sleep(seconds=0.1)
 
     def remove_old_jobs(self):
