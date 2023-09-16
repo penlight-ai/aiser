@@ -7,11 +7,6 @@ from aiser.job_management import AsyncStartJobManager, AsyncStartJob
 from aiser.job_management.timer import SimpleTimer
 
 
-class MockJob(AsyncStartJob):
-    def __init__(self):
-        super().__init__()
-
-
 class MockTimer(SimpleTimer):
     def __init__(self):
         super().__init__()
@@ -35,6 +30,11 @@ class MockTimer(SimpleTimer):
         return self.time_in_seconds
 
 
+class MockJob(AsyncStartJob):
+    def __init__(self, timer: MockTimer):
+        super().__init__(creation_timestamp=timer.get_time_in_seconds())
+
+
 class AsyncStartJobManagerTestCase(unittest.TestCase):
     TIMEOUT_SECONDS: int = 2.0
 
@@ -47,9 +47,12 @@ class AsyncStartJobManagerTestCase(unittest.TestCase):
         )
         self.loop = asyncio.get_event_loop()
 
+    def create_mock_job(self) -> MockJob:
+        return MockJob(timer=self.timer)
+
     def test_job_is_found_if_is_defined_then_waited_for(self):
         async def run_test():
-            job = MockJob()
+            job = self.create_mock_job()
             self.manager.define_job(job_id=self.job_id, job=job)
             job_from_manager: typing.Optional[MockJob] = await self.manager.wait_for_job(job_id=self.job_id)
             self.assertTrue(job == job_from_manager)
@@ -64,7 +67,7 @@ class AsyncStartJobManagerTestCase(unittest.TestCase):
         self.loop.run_until_complete(run_test())
 
     def create_job_at_seconds(self, seconds: float) -> MockJob:
-        job = MockJob()
+        job = self.create_mock_job()
         self.timer.add_action(seconds, lambda: self.manager.define_job(job_id=self.job_id, job=job))
         return job
 
@@ -85,6 +88,15 @@ class AsyncStartJobManagerTestCase(unittest.TestCase):
             manager_job_task = self.create_task_to_wait_for_job()
             _ = self.create_job_at_seconds(self.TIMEOUT_SECONDS + 1.0)
             job_from_manager = await manager_job_task
+            self.assertIsNone(job_from_manager)
+
+        self.loop.run_until_complete(run_test())
+
+    def test_job_should_removed_if_not_used_after_timeout(self):
+        async def run_test():
+            self.create_job_at_seconds(0.0)
+            self.timer.sleep(seconds=self.TIMEOUT_SECONDS + 1.0)
+            job_from_manager = await self.manager.wait_for_job(job_id=self.job_id)
             self.assertIsNone(job_from_manager)
 
         self.loop.run_until_complete(run_test())
