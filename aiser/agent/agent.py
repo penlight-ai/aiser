@@ -9,5 +9,5 @@ class Agent(ABC):
         self.id = agent_id
 
     @abstractmethod
-    def reply(self, input_message: ChatMessage) -> typing.AsyncGenerator[ChatMessage, None]:
+    def reply(self, messages: typing.List[ChatMessage]) -> typing.AsyncGenerator[ChatMessage, None]:
         raise NotImplementedError

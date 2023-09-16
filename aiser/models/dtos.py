@@ -21,7 +21,7 @@ class ChatMessageDto(BaseModel):
 
 
 class AgentChatRequest(BaseModel):
-    inputMessage: ChatMessageDto
+    messages: List[ChatMessageDto]
 
 
 class AgentChatResponse(BaseModel):

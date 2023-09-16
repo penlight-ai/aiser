@@ -15,7 +15,7 @@ class KnowledgeBaseExample(KnowledgeBase):
 
 
 class AgentExample(Agent):
-    async def reply(self, input_message: ChatMessage) -> typing.AsyncGenerator[ChatMessage, None]:
+    async def reply(self, messages: typing.List[ChatMessage]) -> typing.AsyncGenerator[ChatMessage, None]:
         reply_message = "This is an example of a reply from an agent"
         for character in reply_message:
             yield ChatMessage(text_content=character)

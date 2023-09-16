@@ -41,9 +41,8 @@ class SimpleAiServer(AiServer):
         async def agent_chat(agent_id: str, request: AgentChatRequest) -> StreamingResponse:
             for agent in self._agents:
                 if agent.id == agent_id:
-                    response_generator = agent.reply(
-                        input_message=ChatMessage(text_content=request.inputMessage.textContent)
-                    )
+                    messages = [ChatMessage(text_content=messageDto.textContent) for messageDto in request.messages]
+                    response_generator = agent.reply(messages=messages)
                     response_generator = convert_agent_message_gen_to_streaming_response(message_gen=response_generator)
                     return StreamingResponse(
                         response_generator,
