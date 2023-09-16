@@ -1,4 +1,5 @@
-from typing import List, Generator
+from typing import List
+import typing
 from aiser import SimpleAiServer, KnowledgeBase, SemanticSearchResult, Agent
 from aiser.models import ChatMessage
 import asyncio
@@ -14,10 +15,10 @@ class KnowledgeBaseExample(KnowledgeBase):
 
 
 class AgentExample(Agent):
-    async def reply(self, input_message: ChatMessage) -> Generator[str, None, None]:
+    async def reply(self, input_message: ChatMessage) -> typing.AsyncGenerator[ChatMessage, None]:
         reply_message = "This is an example of a reply from an agent"
         for character in reply_message:
-            yield character
+            yield ChatMessage(text_content=character)
             await asyncio.sleep(0.1)
 
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generator
+import typing
 from ..models import ChatMessage
 
 
@@ -9,5 +9,5 @@ class Agent(ABC):
         self.id = agent_id
 
     @abstractmethod
-    def reply(self, input_message: ChatMessage) -> Generator[str, None, None]:
+    def reply(self, input_message: ChatMessage) -> typing.AsyncGenerator[ChatMessage, None]:
         raise NotImplementedError

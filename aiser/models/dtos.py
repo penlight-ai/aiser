@@ -1,31 +1,28 @@
 from pydantic import BaseModel
 from typing import List
-import humps
 
 
-class CamelCaseBaseModel(BaseModel):
-    class Config:
-        alias_generator = humps.camelize
-        allow_population_by_field_name = True
-
-
-class SemanticSearchRequest(CamelCaseBaseModel):
+class SemanticSearchRequest(BaseModel):
     text: str
-    num_results: int
+    numResults: int
 
 
-class SemanticSearchResultDto(CamelCaseBaseModel):
+class SemanticSearchResultDto(BaseModel):
     content: str
     score: float
 
 
-class SemanticSearchResultResponseDto(CamelCaseBaseModel):
+class SemanticSearchResultResponseDto(BaseModel):
     results: List[SemanticSearchResultDto]
 
 
-class ChatMessageDto(CamelCaseBaseModel):
-    text_content: str
+class ChatMessageDto(BaseModel):
+    textContent: str
 
 
-class AgentChatRequest(CamelCaseBaseModel):
-    input_message: ChatMessageDto
+class AgentChatRequest(BaseModel):
+    inputMessage: ChatMessageDto
+
+
+class AgentChatResponse(BaseModel):
+    outputMessage: ChatMessageDto
