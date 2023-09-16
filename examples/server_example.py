@@ -25,10 +25,10 @@ class AgentExample(Agent):
 if __name__ == '__main__':
     server = SimpleAiServer(
         agents=[
-            AgentExample(agent_id="agent_example"),
+            AgentExample(),
         ],
         knowledge_bases=[
-            KnowledgeBaseExample(knowledge_base_id="kb_example"),
+            KnowledgeBaseExample(),
         ],
         port=5000
     )

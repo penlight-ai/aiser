@@ -19,7 +19,7 @@ class SimpleAiServer(AiServer):
         @app.post("/knowledge-base/{kb_id}/semantic-search")
         async def knowledge_base(kb_id: str, request: SemanticSearchRequest) -> SemanticSearchResultResponseDto:
             for kb in self._knowledge_bases:
-                if kb.id == kb_id:
+                if kb.accepts_id(kb_id):
                     results = kb.perform_semantic_search(
                         query_text=request.text,
                         desired_number_of_results=request.numResults
@@ -40,7 +40,7 @@ class SimpleAiServer(AiServer):
         @app.post("/agent/{agent_id}/chat")
         async def agent_chat(agent_id: str, request: AgentChatRequest) -> StreamingResponse:
             for agent in self._agents:
-                if agent.id == agent_id:
+                if agent.accepts_id(agent_id):
                     messages = [ChatMessage(text_content=messageDto.textContent) for messageDto in request.messages]
                     response_generator = agent.reply(messages=messages)
                     response_generator = convert_agent_message_gen_to_streaming_response(message_gen=response_generator)
