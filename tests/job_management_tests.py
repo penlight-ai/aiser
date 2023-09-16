@@ -1,7 +1,6 @@
 import typing
 import unittest
 import asyncio
-import time
 
 from aiser.job_management import AsyncStartJobManager, AsyncStartJob
 from aiser.job_management.timer import SimpleTimer
