@@ -4,11 +4,13 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from .ai_server import AiServer
+from ..ai_server_consumer import AiServerConsumer
 from ..job_management import AsyncStartJobManager, AsyncStartJob
 from ..models.dtos import SemanticSearchRequest, AgentChatRequest, SemanticSearchResultDto, \
-    SemanticSearchResultResponseDto, AgentChatResponse, ChatMessageDto
+    SemanticSearchResultResponseDto, AgentChatResponse, ChatMessageDto, PublicKeyInfo
 from ..models import ChatMessage
 import typing
+import httpx
 
 
 class AgentChatJob(AsyncStartJob):
@@ -20,9 +22,43 @@ class AgentChatJob(AsyncStartJob):
         return self._agent_chat_request
 
 
+class PublicKeyInfoClient:
+    def __init__(self, consumer: AiServerConsumer):
+        self._consumer = consumer
+
+    async def fetch_public_key_info(self) -> PublicKeyInfo:
+        async with httpx.AsyncClient() as client:
+            url = str(self._consumer.publicKeyInfoUrl)
+            response = await client.get(url)
+            response.raise_for_status()
+            public_key_info = PublicKeyInfo(**response.json())
+            return public_key_info
+
+
+class PublicKeyInfoGetter:
+    def __init__(
+            self,
+            public_key_info_client: PublicKeyInfoClient,
+            refresh_interval_in_seconds: float = 60,
+    ):
+        self._public_key_info_client = public_key_info_client
+        self._public_key_info: typing.Optional[PublicKeyInfo] = None
+        self._last_refresh_timestamp: float = 0
+        self._refresh_interval_in_seconds = refresh_interval_in_seconds
+
+    async def get_public_key_info(self) -> PublicKeyInfo:
+        if (self._public_key_info is None
+                or (time.time() - self._last_refresh_timestamp) > self._refresh_interval_in_seconds):
+            self._public_key_info = await self._public_key_info_client.fetch_public_key_info()
+            self._last_refresh_timestamp = time.time()
+        return self._public_key_info
+
+
 class RestAiServer(AiServer):
     def _get_app(self) -> FastAPI:
         app = FastAPI()
+        public_key_info_client = PublicKeyInfoClient(consumer=self._config.consumer)
+        public_key_info_getter = PublicKeyInfoGetter(public_key_info_client=public_key_info_client)
 
         @app.get("/version")
         async def version() -> str:

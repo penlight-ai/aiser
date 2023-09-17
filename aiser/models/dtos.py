@@ -26,3 +26,8 @@ class AgentChatRequest(BaseModel):
 
 class AgentChatResponse(BaseModel):
     outputMessage: ChatMessageDto
+
+
+class PublicKeyInfo(BaseModel):
+    publicKey: str
+    keyId: str
