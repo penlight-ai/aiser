@@ -6,9 +6,11 @@ from pydantic import BaseModel
 
 class AiServerConfig(BaseModel):
     consumer: AiServerConsumer
+    complete_url: str
 
 
 def make_ai_server_config(
+        complete_url: str,
         consumer: typing.Optional[AiServerConsumer] = None
 ) -> AiServerConfig:
     env_variables = get_ai_server_env_variables()
@@ -16,6 +18,7 @@ def make_ai_server_config(
     final_consumer = _determine_consumer(consumer=consumer, env_variables=env_variables)
 
     return AiServerConfig(
+        complete_url=complete_url,
         consumer=final_consumer
     )
 

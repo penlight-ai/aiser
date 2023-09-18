@@ -14,6 +14,7 @@ class AiServer(ABC):
 
     def __init__(
             self,
+            complete_url: str,
             knowledge_bases: Optional[List[KnowledgeBase]] = None,
             agents: Optional[List[Agent]] = None,
             port: int = 5000,
@@ -23,7 +24,9 @@ class AiServer(ABC):
         self._port = port
         self._knowledge_bases = [] if knowledge_bases is None else knowledge_bases
         self._agents = [] if agents is None else agents
-        self._config: AiServerConfig = config or make_ai_server_config()
+        self._config: AiServerConfig = config or make_ai_server_config(
+            complete_url=complete_url
+        )
         IdentifiableGroupValidator.assert_group_is_valid(self._knowledge_bases, group_name='Knowledge bases')
         IdentifiableGroupValidator.assert_group_is_valid(self._agents, group_name='Agents')
 

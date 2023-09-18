@@ -1,8 +1,9 @@
 import time
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.responses import StreamingResponse
+from fastapi.security import OAuth2
 from .ai_server import AiServer
 from ..ai_server_consumer import AiServerConsumer
 from ..job_management import AsyncStartJobManager, AsyncStartJob
@@ -11,6 +12,9 @@ from ..models.dtos import SemanticSearchRequest, AgentChatRequest, SemanticSearc
 from ..models import ChatMessage
 import typing
 import httpx
+import jwt
+
+from ..utils import base64_to_pem
 
 
 class AgentChatJob(AsyncStartJob):
@@ -60,12 +64,35 @@ class RestAiServer(AiServer):
         public_key_info_client = PublicKeyInfoClient(consumer=self._config.consumer)
         public_key_info_getter = PublicKeyInfoGetter(public_key_info_client=public_key_info_client)
 
+        auth_scheme = OAuth2()
+
+        async def verify_token(token: str = Depends(auth_scheme)) -> None:
+            try:
+                token_without_prefix = token.split(" ")[1]
+                public_key = (await public_key_info_getter.get_public_key_info()).publicKey
+                public_key_pem = base64_to_pem(public_key)
+                decoded_jwt = jwt.decode(jwt=token_without_prefix, key=public_key_pem, algorithms=["RS256"], options={
+                    "verify_signature": True,
+                    "verify_exp": True,
+                    "verify_nbf": True,
+                    "verify_iat": True,
+                    "verify_aud": False,
+                })
+                if decoded_jwt['aud'] != self._config.complete_url:
+                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+                print(decoded_jwt)
+            except jwt.exceptions.InvalidTokenError as error:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
         @app.get("/version")
-        async def version() -> str:
+        async def version(token: str = Depends(verify_token)) -> str:
             return "0.1.0"
 
         @app.post("/knowledge-base/{kb_id}/semantic-search")
-        async def knowledge_base(kb_id: str, request: SemanticSearchRequest) -> SemanticSearchResultResponseDto:
+        async def knowledge_base(
+                kb_id: str, request: SemanticSearchRequest,
+                token: str = Depends(verify_token)
+        ) -> SemanticSearchResultResponseDto:
             for kb in self._knowledge_bases:
                 if kb.accepts_id(kb_id):
                     results = kb.perform_semantic_search(
@@ -88,7 +115,11 @@ class RestAiServer(AiServer):
         job_manager = AsyncStartJobManager()
 
         @app.post("/agent/{agent_id}/chat/{job_id}")
-        async def agent_chat(agent_id: str, job_id: str, request: AgentChatRequest):
+        async def agent_chat(
+                agent_id: str,
+                job_id: str, request: AgentChatRequest,
+                token: str = Depends(verify_token)
+        ):
             for agent in self._agents:
                 if agent.accepts_id(agent_id):
                     new_job = AgentChatJob(agent_chat_request=request)
@@ -97,7 +128,11 @@ class RestAiServer(AiServer):
             raise HTTPException(status_code=404, detail="Agent not found")
 
         @app.get("/agent/{agent_id}/chat/{job_id}")
-        async def agent_chat(agent_id: str, job_id: str) -> StreamingResponse:
+        async def agent_chat(
+                agent_id: str,
+                job_id: str,
+                token: str = Depends(verify_token)
+        ) -> StreamingResponse:
             for agent in self._agents:
                 if agent.accepts_id(agent_id):
                     job = await job_manager.wait_for_job(job_id=job_id)
