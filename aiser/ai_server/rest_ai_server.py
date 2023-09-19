@@ -80,10 +80,12 @@ class RestAiServer(AiServer):
                 })
                 if decoded_jwt['aud'] != self._config.complete_url:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-                print(decoded_jwt)
+                # print(decoded_jwt)
             except jwt.exceptions.InvalidTokenError as error:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-
+            except Exception as e:
+                print(e)
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         @app.get("/version")
         async def version(token: str = Depends(verify_token)) -> str:
             return "0.1.0"
