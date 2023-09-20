@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'uvicorn',
         'fastapi',
-        'pyjwt[crypto]'
+        'pyjwt[crypto]',
         'httpx',
     ],
     license='Apache License 2.0',
