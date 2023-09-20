@@ -9,7 +9,12 @@ setup(
     description='Python package to serve AI agents and knowledge bases for Penlight AI.',
     long_description='Python package to serve AI agents and knowledge bases for Penlight AI.',
     packages=find_packages(),
-    install_requires=[],
+    install_requires=[
+        'uvicorn',
+        'fastapi',
+        'pyjwt[crypto]'
+        'httpx',
+    ],
     license='Apache License 2.0',
     classifiers=[
         'Development Status :: 1 - Planning',
