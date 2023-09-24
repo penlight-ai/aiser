@@ -94,6 +94,7 @@ if __name__ == '__main__':
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
     server = RestAiServer(
+        # update the complete_url to your production URL and port
         complete_url="http://127.0.0.1:5000",
         agents=[
             AgentExample(
