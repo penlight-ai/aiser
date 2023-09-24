@@ -66,6 +66,10 @@ class RestAiServer(AiServer):
         app = FastAPI()
         verify_token = self._authenticator.get_authentication_dependency()
 
+        @app.get("/")
+        async def read_root():
+            return "ok"
+
         @app.get("/version")
         async def version(token: str = Depends(verify_token)) -> str:
             return "0.1.0"
