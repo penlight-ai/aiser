@@ -35,20 +35,15 @@ class AgentExample(Agent):
         self._openai_api_key = openai_api_key
         self._model_name = model_name
 
-    async def _execute_model(self, chat_model, combined_messages_as_str: str):
-        await chat_model.apredict_messages(messages=[
-            HumanMessage(content=combined_messages_as_str)
-        ])
-
     async def reply(self, messages: typing.List[ChatMessage]) -> typing.AsyncGenerator[ChatMessage, None]:
         callback_handler = CustomCallbackHandler()
         ai_model = self._make_model(
             callback_handler=callback_handler
         )
-        messages_combined_str = self._make_messages_combined_str(messages=messages)
+        model_input = self._make_model_input(messages=messages)
         task = asyncio.create_task(self._execute_model(
             chat_model=ai_model,
-            combined_messages_as_str=messages_combined_str
+            model_input=model_input
         ))
 
         async for tokens in callback_handler.get_generated_tokens():
@@ -68,7 +63,7 @@ class AgentExample(Agent):
             verbose=True
         )
 
-    def _make_messages_combined_str(self, messages: typing.List[ChatMessage]) -> str:
+    def _make_model_input(self, messages: typing.List[ChatMessage]) -> str:
         starting_message = ChatMessage(
             text_content='''
 You are Opposite Agent. Whenever you receive a message from the user, you should reply with the opposite of that message.
@@ -76,15 +71,19 @@ Don't reply with anything other than the exact opposite of the user's message.
 ''',
         )
         messages_combined = [starting_message] + list(messages)
-        messages_combined_str = self._messages_to_prompt_string(messages_combined)
-        return messages_combined_str
+        return self._messages_to_single_str(messages_combined)
 
-    def _messages_to_prompt_string(self, messages: List[ChatMessage]) -> str:
+    def _messages_to_single_str(self, messages: List[ChatMessage]) -> str:
         final_prompt = ""
         for i, message in enumerate(messages):
             final_prompt += f"message {i}: {message.text_content}\n"
         final_prompt += f"message {len(messages)}:"
         return final_prompt
+
+    async def _execute_model(self, chat_model, model_input: str):
+        await chat_model.apredict_messages(messages=[
+            HumanMessage(content=model_input)
+        ])
 
 
 if __name__ == '__main__':
