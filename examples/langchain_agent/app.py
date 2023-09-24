@@ -41,7 +41,7 @@ class AgentExample(Agent):
             callback_handler=callback_handler
         )
         model_input = self._make_model_input(messages=messages)
-        task = asyncio.create_task(self._execute_model(
+        model_execution_task = asyncio.create_task(self._execute_model(
             chat_model=ai_model,
             model_input=model_input
         ))
@@ -51,7 +51,7 @@ class AgentExample(Agent):
                 yield ChatMessage(
                     text_content=token,
                 )
-        await task
+        await model_execution_task
 
     def _make_model(self, callback_handler: CustomCallbackHandler) -> ChatOpenAI:
         return ChatOpenAI(
