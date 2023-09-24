@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from aiser.utils import get_aiser_version
 
 setup(
     name='aiser',
-    version='0.3.1',
+    version=get_aiser_version(),
     url='https://github.com/penlight-ai/aiapi',
     author='Penlight AI Inc.',
     author_email='support@penlight.ai',

@@ -74,7 +74,8 @@ class RestAiServer(AiServer):
 
         @app.get("/version")
         async def version(token: str = Depends(verify_token)) -> str:
-            return "0.1.0"
+            version = self.get_aiser_version()
+            return version
 
         @app.post("/knowledge-base/{kb_id}/semantic-search")
         async def knowledge_base(

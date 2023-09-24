@@ -5,6 +5,7 @@ from ..identifiable_entities import IdentifiableGroupValidator
 from ..knowledge_base import KnowledgeBase
 from ..agent import Agent
 from ..config import AiServerConfig, make_ai_server_config
+from ..utils import get_aiser_version
 
 
 class AiServer(ABC):
@@ -31,6 +32,9 @@ class AiServer(ABC):
         )
         IdentifiableGroupValidator.assert_group_is_valid(self._knowledge_bases, group_name='Knowledge bases')
         IdentifiableGroupValidator.assert_group_is_valid(self._agents, group_name='Agents')
+
+    def get_aiser_version(self) -> str:
+        return get_aiser_version()
 
     @abstractmethod
     def run(self):
