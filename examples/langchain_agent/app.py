@@ -2,13 +2,12 @@ from typing import List, Any
 import typing
 from aiser import RestAiServer, Agent
 from aiser.models import ChatMessage
-import time
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import HumanMessage
 from dotenv import load_dotenv
 import os
-import threading
+import asyncio
 
 
 class CustomCallbackHandler(BaseCallbackHandler):
@@ -22,12 +21,12 @@ class CustomCallbackHandler(BaseCallbackHandler):
     def on_llm_end(self, response, **kwargs: Any) -> None:
         self._has_finished = True
 
-    def get_generated_tokens(self) -> typing.Generator[List[str], None, None]:
+    async def get_generated_tokens(self) -> typing.AsyncGenerator[List[str], None]:
         while (not self._has_finished) or (len(self._tokens) > 0):
             if len(self._tokens) > 0:
                 yield self._tokens
                 self._tokens = []
-            time.sleep(0.1)
+            await asyncio.sleep(0.05)
 
 
 class AgentExample(Agent):
@@ -36,8 +35,8 @@ class AgentExample(Agent):
         self._openai_api_key = openai_api_key
         self._model_name = model_name
 
-    def _execute_model(self, chat_model, combined_messages_as_str: str, results: List[Any]):
-        results[0] = chat_model.predict_messages(messages=[
+    async def _execute_model(self, chat_model, combined_messages_as_str: str):
+        await chat_model.apredict_messages(messages=[
             HumanMessage(content=combined_messages_as_str)
         ])
 
@@ -47,20 +46,17 @@ class AgentExample(Agent):
             callback_handler=callback_handler
         )
         messages_combined_str = self._make_messages_combined_str(messages=messages)
-        thread1_result_array: List[Any] = [None]  # this is to get the return value from the thread
-        thread_executing_model = threading.Thread(
-            target=self._execute_model,
-            args=(ai_model, messages_combined_str, thread1_result_array)
-        )
-        thread_executing_model.start()
+        task = asyncio.create_task(self._execute_model(
+            chat_model=ai_model,
+            combined_messages_as_str=messages_combined_str
+        ))
 
-        for tokens in callback_handler.get_generated_tokens():
+        async for tokens in callback_handler.get_generated_tokens():
             for token in tokens:
                 yield ChatMessage(
                     text_content=token,
                 )
-
-        thread_executing_model.join()
+        await task
 
     def _make_model(self, callback_handler: CustomCallbackHandler) -> ChatOpenAI:
         return ChatOpenAI(
