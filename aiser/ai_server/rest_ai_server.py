@@ -18,7 +18,8 @@ from ..models.dtos import (
     SemanticSearchResultDto,
     SemanticSearchResultResponseDto,
     AgentChatResponse,
-    ChatMessageDto
+    ChatMessageDto,
+    VersionInfo
 )
 from ..models import ChatMessage
 from ..knowledge_base import KnowledgeBase
@@ -73,9 +74,8 @@ class RestAiServer(AiServer):
             return "ok"
 
         @app.get("/version")
-        async def version(token: str = Depends(verify_token)) -> str:
-            version = self.get_aiser_version()
-            return version
+        async def version(token: str = Depends(verify_token)) -> VersionInfo:
+            return VersionInfo(version=self.get_aiser_version())
 
         @app.post("/knowledge-base/{kb_id}/semantic-search")
         async def knowledge_base(

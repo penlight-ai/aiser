@@ -31,3 +31,7 @@ class AgentChatResponse(BaseModel):
 class PublicKeyInfo(BaseModel):
     publicKey: str
     keyId: str
+
+
+class VersionInfo(BaseModel):
+    version: str
