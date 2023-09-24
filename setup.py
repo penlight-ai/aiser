@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='aiser',
-    version='0.3.0',
+    version='0.3.1',
     url='https://github.com/penlight-ai/aiapi',
     author='Penlight AI Inc.',
     author_email='support@penlight.ai',
