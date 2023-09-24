@@ -137,4 +137,4 @@ class RestAiServer(AiServer):
         return app
 
     def run(self):
-        uvicorn.run(app=self._get_app(), port=self._port)
+        uvicorn.run(app=self._get_app(), port=self._port, host=self._host)
