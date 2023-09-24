@@ -1,27 +1,26 @@
-from typing import List, Any
 import typing
-from aiser import RestAiServer, Agent
-from aiser.models import ChatMessage
+import os
+import asyncio
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import HumanMessage
 from dotenv import load_dotenv
-import os
-import asyncio
+from aiser import RestAiServer, Agent
+from aiser.models import ChatMessage
 
 
 class CustomCallbackHandler(BaseCallbackHandler):
     def __init__(self):
-        self._tokens: List[str] = []
+        self._tokens: typing.List[str] = []
         self._has_finished: bool = False
 
-    def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+    def on_llm_new_token(self, token: str, **kwargs: typing.Any) -> None:
         self._tokens.append(token)
 
-    def on_llm_end(self, response, **kwargs: Any) -> None:
+    def on_llm_end(self, response, **kwargs: typing.Any) -> None:
         self._has_finished = True
 
-    async def get_generated_tokens(self) -> typing.AsyncGenerator[List[str], None]:
+    async def get_generated_tokens(self) -> typing.AsyncGenerator[typing.List[str], None]:
         while (not self._has_finished) or (len(self._tokens) > 0):
             if len(self._tokens) > 0:
                 yield self._tokens
@@ -73,7 +72,7 @@ Don't reply with anything other than the exact opposite of the user's message.
         messages_combined = [starting_message] + list(messages)
         return self._messages_to_single_str(messages_combined)
 
-    def _messages_to_single_str(self, messages: List[ChatMessage]) -> str:
+    def _messages_to_single_str(self, messages: typing.List[ChatMessage]) -> str:
         final_prompt = ""
         for i, message in enumerate(messages):
             final_prompt += f"message {i}: {message.text_content}\n"
