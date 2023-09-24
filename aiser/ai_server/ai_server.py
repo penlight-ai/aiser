@@ -15,10 +15,10 @@ class AiServer(ABC):
     def __init__(
             self,
             complete_url: str,
+            host: str,
+            port: int,
             knowledge_bases: Optional[List[KnowledgeBase]] = None,
             agents: Optional[List[Agent]] = None,
-            port: int = 5000,
-            host: str = "127.0.0.1",
             config: Optional[AiServerConfig] = None
     ):
         super().__init__()

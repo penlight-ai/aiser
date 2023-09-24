@@ -41,6 +41,7 @@ class RestAiServer(AiServer):
             complete_url: str,
             knowledge_bases: typing.Optional[typing.List[KnowledgeBase]] = None,
             agents: typing.Optional[typing.List[Agent]] = None,
+            host: str = "127.0.0.1",
             port: int = 5000,
             config: typing.Optional[AiServerConfig] = None,
             authenticator: typing.Optional[RestAuthenticator] = None
@@ -49,6 +50,7 @@ class RestAiServer(AiServer):
             complete_url=complete_url,
             knowledge_bases=knowledge_bases,
             agents=agents,
+            host=host,
             port=port,
             config=config
         )
