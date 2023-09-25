@@ -52,6 +52,7 @@ class AsymmetricJwtRestAuthenticator(RestAuthenticator):
         self._complete_server_url = complete_server_url
         self._consumer = consumer
 
+    def _make_authentication_dependency(self, acceptable_subjects: typing.List[str]) -> TokenVerificationCallable:
         public_key_info_client = PublicKeyInfoClient(consumer=self._consumer)
         public_key_info_getter = PublicKeyInfoGetter(public_key_info_client=public_key_info_client)
 
@@ -72,11 +73,13 @@ class AsymmetricJwtRestAuthenticator(RestAuthenticator):
 
                 if (self._complete_server_url is not None) and (decoded_jwt['aud'] != self._complete_server_url):
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+                if decoded_jwt['sub'] not in acceptable_subjects:
+                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
             except jwt.exceptions.InvalidTokenError as error:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
             return token
 
-        self._verify_token = verify_token
+        return verify_token
 
-    def get_authentication_dependency(self) -> TokenVerificationCallable:
-        return self._verify_token
+    def get_authentication_dependency(self, acceptable_subjects: typing.List[str]) -> TokenVerificationCallable:
+        return self._make_authentication_dependency(acceptable_subjects=acceptable_subjects)

@@ -7,5 +7,5 @@ TokenVerificationCallable = typing.Callable[[...], TokenVerifyCoroutine]
 
 class RestAuthenticator(ABC):
     @abstractmethod
-    def get_authentication_dependency(self) -> TokenVerificationCallable:
+    def get_authentication_dependency(self, acceptable_subjects: typing.List[str]) -> TokenVerificationCallable:
         raise NotImplementedError

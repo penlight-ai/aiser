@@ -67,7 +67,9 @@ class RestAiServer(AiServer):
 
     def _get_app(self) -> FastAPI:
         app = FastAPI()
-        verify_token = self._authenticator.get_authentication_dependency()
+        verify_token = self._authenticator.get_authentication_dependency(
+            acceptable_subjects=self._get_list_of_identifiable_entity_ids()
+        )
 
         @app.get("/")
         async def read_root():

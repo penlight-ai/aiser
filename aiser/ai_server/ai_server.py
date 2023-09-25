@@ -36,3 +36,14 @@ class AiServer(ABC):
     @abstractmethod
     def run(self):
         raise NotImplementedError
+
+    def _get_list_of_identifiable_entity_ids(self) -> List[str]:
+        agent_ids = [
+            agent.get_id()
+            for agent in self._agents
+        ]
+        knowledge_base_ids = [
+            knowledge_base.get_id()
+            for knowledge_base in self._knowledge_bases
+        ]
+        return agent_ids + knowledge_base_ids
