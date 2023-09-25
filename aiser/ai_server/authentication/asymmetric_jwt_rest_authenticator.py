@@ -46,7 +46,7 @@ class PublicKeyInfoGetter:
 class AsymmetricJwtRestAuthenticator(RestAuthenticator):
     def __init__(
             self,
-            complete_server_url: str,
+            complete_server_url: typing.Optional[str],
             consumer: AiServerConsumer
     ):
         self._complete_server_url = complete_server_url
@@ -69,7 +69,8 @@ class AsymmetricJwtRestAuthenticator(RestAuthenticator):
                     "verify_iat": True,
                     "verify_aud": False,
                 })
-                if decoded_jwt['aud'] != self._complete_server_url:
+
+                if (self._complete_server_url is not None) and (decoded_jwt['aud'] != self._complete_server_url):
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
             except jwt.exceptions.InvalidTokenError as error:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

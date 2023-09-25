@@ -39,7 +39,7 @@ class AgentChatJob(AsyncStartJob):
 class RestAiServer(AiServer):
     def __init__(
             self,
-            complete_url: str,
+            complete_url: typing.Optional[str] = None,
             knowledge_bases: typing.Optional[typing.List[KnowledgeBase]] = None,
             agents: typing.Optional[typing.List[Agent]] = None,
             host: str = "127.0.0.1",

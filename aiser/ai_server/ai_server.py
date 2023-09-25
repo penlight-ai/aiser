@@ -14,9 +14,9 @@ class AiServer(ABC):
 
     def __init__(
             self,
-            complete_url: str,
             host: str,
             port: int,
+            complete_url: Optional[bool],
             knowledge_bases: Optional[List[KnowledgeBase]] = None,
             agents: Optional[List[Agent]] = None,
             config: Optional[AiServerConfig] = None

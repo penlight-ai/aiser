@@ -11,12 +11,12 @@ class ServerEnvironment:
 
 class AiServerConfig(BaseModel):
     consumer: AiServerConsumer
-    complete_url: str
+    complete_url: typing.Optional[str]
     server_environment: str
 
 
 def make_ai_server_config(
-        complete_url: str,
+        complete_url: typing.Optional[str],
         consumer: typing.Optional[AiServerConsumer] = None
 ) -> AiServerConfig:
     config_maker = AiServerConfigMaker(
@@ -30,7 +30,7 @@ def make_ai_server_config(
 class AiServerConfigMaker:
     def __init__(
             self,
-            complete_url: str,
+            complete_url: typing.Optional[str],
             env_variables: AiServerEnvVariables,
             overriding_consumer: typing.Optional[AiServerConsumer] = None,
     ):

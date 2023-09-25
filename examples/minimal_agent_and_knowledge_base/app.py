@@ -24,7 +24,6 @@ class AgentExample(Agent):
 
 if __name__ == '__main__':
     server = RestAiServer(
-        complete_url="http://127.0.0.1:5000",
         agents=[
             AgentExample(agent_id='agent1'),  # replace with your agent id
         ],
