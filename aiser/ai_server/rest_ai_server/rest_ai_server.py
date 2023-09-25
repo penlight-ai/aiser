@@ -2,7 +2,7 @@ import time
 import typing
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends, APIRouter
+from fastapi import FastAPI, HTTPException, Depends, APIRouter, Request, status
 from fastapi.responses import StreamingResponse
 from aiser.ai_server.ai_server import AiServer
 from aiser.ai_server.authentication import (
@@ -25,6 +25,7 @@ from aiser.models import ChatMessage
 from aiser.knowledge_base import KnowledgeBase
 from aiser.agent import Agent
 from aiser.config import AiServerConfig
+from aiser.utils import meets_minimum_version
 
 
 class AgentChatJob(AsyncStartJob):
@@ -70,8 +71,26 @@ class RestAiServer(AiServer):
             acceptable_subjects=self._get_list_of_identifiable_entity_ids()
         )
 
+        def verify_meets_minimum_version(request: Request):
+            min_version = request.headers.get("X-Min-Aiser-Version")
+            if min_version is None:
+                return
+            if not meets_minimum_version(
+                    current_version=self.get_aiser_version(),
+                    min_version=min_version
+            ):
+                error_message = f"Minimum version required: {min_version}. Current version: {self.get_aiser_version()}"
+                print(error_message)
+                raise HTTPException(
+                    status_code=status.HTTP_426_UPGRADE_REQUIRED,
+                    detail=error_message
+                )
+
         non_authenticated_router = APIRouter()
-        authenticated_router = APIRouter(dependencies=[Depends(verify_token)])
+        authenticated_router = APIRouter(dependencies=[
+            Depends(verify_token),
+            Depends(verify_meets_minimum_version)
+        ])
 
         @non_authenticated_router.get("/")
         async def read_root():

@@ -12,3 +12,12 @@ def base64_to_pem(base64_key) -> str:
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
     return pem.decode()
+
+
+def meets_minimum_version(current_version: str, min_version: str) -> bool:
+    current_version_split = current_version.split(".")
+    min_version_split = min_version.split(".")
+    for current_version_part, min_version_part in zip(current_version_split, min_version_split):
+        if int(current_version_part) < int(min_version_part):
+            return False
+    return True
