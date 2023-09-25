@@ -7,7 +7,7 @@ from aiser.knowledge_base.semantic_search_result import SemanticSearchResult
 
 
 class KnowledgeBase(IdentifiableEntity, ABC):
-    def __init__(self, knowledge_base_id: typing.Optional[str] = None):
+    def __init__(self, knowledge_base_id: str):
         super().__init__(entity_id=knowledge_base_id)
 
     @abstractmethod

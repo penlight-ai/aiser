@@ -6,7 +6,7 @@ from ..models import ChatMessage
 
 
 class Agent(IdentifiableEntity, ABC):
-    def __init__(self, agent_id: typing.Optional[str] = None):
+    def __init__(self, agent_id: str):
         super().__init__(entity_id=agent_id)
 
     @abstractmethod
