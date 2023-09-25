@@ -72,7 +72,7 @@ class RestAiServer(AiServer):
         )
 
         def verify_meets_minimum_version(request: Request):
-            min_version = request.headers.get("X-Min-Aiser-Version")
+            min_version = request.headers.get("Min-Aiser-Version")
             if min_version is None:
                 return
             if not meets_minimum_version(
