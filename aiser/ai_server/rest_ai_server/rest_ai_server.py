@@ -2,17 +2,17 @@ import time
 import typing
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, APIRouter
 from fastapi.responses import StreamingResponse
-from .ai_server import AiServer
+from aiser.ai_server.ai_server import AiServer
 from aiser.ai_server.authentication import (
     AsymmetricJwtRestAuthenticator,
     NonFunctionalRestAuthenticator,
     RestAuthenticator
 )
-from ..config.ai_server_config import ServerEnvironment
-from ..job_management import AsyncStartJobManager, AsyncStartJob
-from ..models.dtos import (
+from aiser.config.ai_server_config import ServerEnvironment
+from aiser.job_management import AsyncStartJobManager, AsyncStartJob
+from aiser.models.dtos import (
     SemanticSearchRequest,
     AgentChatRequest,
     SemanticSearchResultDto,
@@ -21,10 +21,10 @@ from ..models.dtos import (
     ChatMessageDto,
     VersionInfo
 )
-from ..models import ChatMessage
-from ..knowledge_base import KnowledgeBase
-from ..agent import Agent
-from ..config import AiServerConfig
+from aiser.models import ChatMessage
+from aiser.knowledge_base import KnowledgeBase
+from aiser.agent import Agent
+from aiser.config import AiServerConfig
 
 
 class AgentChatJob(AsyncStartJob):
@@ -66,23 +66,24 @@ class RestAiServer(AiServer):
         )
 
     def _get_app(self) -> FastAPI:
-        app = FastAPI()
         verify_token = self._authenticator.get_authentication_dependency(
             acceptable_subjects=self._get_list_of_identifiable_entity_ids()
         )
 
-        @app.get("/")
+        non_authenticated_router = APIRouter()
+        authenticated_router = APIRouter(dependencies=[Depends(verify_token)])
+
+        @non_authenticated_router.get("/")
         async def read_root():
             return "ok"
 
-        @app.get("/version")
-        async def version(token: str = Depends(verify_token)) -> VersionInfo:
+        @authenticated_router.get("/version")
+        async def version() -> VersionInfo:
             return VersionInfo(version=self.get_aiser_version())
 
-        @app.post("/knowledge-base/{kb_id}/semantic-search")
+        @authenticated_router.post("/knowledge-base/{kb_id}/semantic-search")
         async def knowledge_base(
                 kb_id: str, request: SemanticSearchRequest,
-                token: str = Depends(verify_token)
         ) -> SemanticSearchResultResponseDto:
             for kb in self._knowledge_bases:
                 if kb.accepts_id(kb_id):
@@ -105,11 +106,10 @@ class RestAiServer(AiServer):
 
         job_manager = AsyncStartJobManager()
 
-        @app.post("/agent/{agent_id}/chat/{job_id}")
+        @authenticated_router.post("/agent/{agent_id}/chat/{job_id}")
         async def agent_chat(
                 agent_id: str,
                 job_id: str, request: AgentChatRequest,
-                token: str = Depends(verify_token)
         ):
             for agent in self._agents:
                 if agent.accepts_id(agent_id):
@@ -118,11 +118,10 @@ class RestAiServer(AiServer):
                     return
             raise HTTPException(status_code=404, detail="Agent not found")
 
-        @app.get("/agent/{agent_id}/chat/{job_id}")
+        @authenticated_router.get("/agent/{agent_id}/chat/{job_id}")
         async def agent_chat(
                 agent_id: str,
                 job_id: str,
-                token: str = Depends(verify_token)
         ) -> StreamingResponse:
             for agent in self._agents:
                 if agent.accepts_id(agent_id):
@@ -138,6 +137,10 @@ class RestAiServer(AiServer):
                         media_type="text/event-stream"
                     )
             raise HTTPException(status_code=404, detail="Agent not found")
+
+        app = FastAPI()
+        app.include_router(authenticated_router)
+        app.include_router(non_authenticated_router)
 
         return app
 
