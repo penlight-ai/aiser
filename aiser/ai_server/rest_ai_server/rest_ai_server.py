@@ -121,7 +121,7 @@ class RestAiServer(AiServer):
                 message_gen: typing.AsyncGenerator[ChatMessage, None]) -> typing.AsyncGenerator[str, None]:
             async for item in message_gen:
                 message_dto = ChatMessageDto(textContent=item.text_content)
-                yield AgentChatResponse(outputMessage=message_dto).model_dump_json(by_alias=True) + "\n\n"
+                yield AgentChatResponse(outputMessage=message_dto).model_dump_json(by_alias=True) + "\n"
 
         job_manager = AsyncStartJobManager()
 
