@@ -4,7 +4,7 @@ from typing import List, Optional
 from ..knowledge_base import KnowledgeBase
 from ..agent import Agent
 from ..config import AiServerConfig, make_ai_server_config
-from ..utils import get_aiser_version
+from ..version import __version__
 
 
 class AiServer(ABC):
@@ -31,7 +31,7 @@ class AiServer(ABC):
         )
 
     def get_aiser_version(self) -> str:
-        return get_aiser_version()
+        return __version__
 
     @abstractmethod
     def run(self):

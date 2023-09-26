@@ -1,9 +1,21 @@
 from setuptools import setup, find_packages
-from aiser.utils import get_aiser_version
+
+
+def read_version():
+    with open('aiser/version.py', 'r') as f:
+        lines = f.readlines()
+    for line in lines:
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    raise RuntimeError('Unable to find version string.')
+
+
+version = read_version()
 
 setup(
     name='aiser',
-    version=get_aiser_version(),
+    version=version,
     url='https://github.com/penlight-ai/aiapi',
     author='Penlight AI Inc.',
     author_email='support@penlight.ai',

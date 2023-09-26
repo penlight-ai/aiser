@@ -1,7 +1,6 @@
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import base64
-from .version import get_aiser_version
 
 
 def base64_to_pem(base64_key) -> str:
