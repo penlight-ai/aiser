@@ -11,7 +11,7 @@ from aiser.ai_server.authentication import (
     RestAuthenticator
 )
 from aiser.config.ai_server_config import ServerEnvironment
-from aiser.job_management import AsyncStartJobManager, AsyncStartJob
+from aiser.job_management import AsyncStartJob
 from aiser.models.dtos import (
     SemanticSearchRequest,
     AgentChatRequest,
@@ -123,31 +123,13 @@ class RestAiServer(AiServer):
                 message_dto = ChatMessageDto(textContent=item.text_content)
                 yield AgentChatResponse(outputMessage=message_dto).model_dump_json(by_alias=True) + "\n"
 
-        job_manager = AsyncStartJobManager()
-
-        @authenticated_router.post("/agent/{agent_id}/chat/{job_id}")
+        @authenticated_router.post("/agent/{agent_id}/chat")
         async def agent_chat(
                 agent_id: str,
-                job_id: str, request: AgentChatRequest,
-        ):
-            for agent in self._agents:
-                if agent.accepts_id(agent_id):
-                    new_job = AgentChatJob(agent_chat_request=request)
-                    job_manager.define_job(job_id=job_id, job=new_job)
-                    return
-            raise HTTPException(status_code=404, detail="Agent not found")
-
-        @authenticated_router.get("/agent/{agent_id}/chat/{job_id}")
-        async def agent_chat(
-                agent_id: str,
-                job_id: str,
+                request: AgentChatRequest,
         ) -> StreamingResponse:
             for agent in self._agents:
                 if agent.accepts_id(agent_id):
-                    job = await job_manager.wait_for_job(job_id=job_id)
-                    if job is None:
-                        raise HTTPException(status_code=404, detail="Job not found")
-                    request = job.get_agent_chat_request()
                     messages = [ChatMessage(text_content=messageDto.textContent) for messageDto in request.messages]
                     response_generator = agent.reply(messages=messages)
                     response_generator = convert_agent_message_gen_to_streaming_response(message_gen=response_generator)
