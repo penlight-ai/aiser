@@ -25,10 +25,14 @@ class AgentExample(Agent):
 if __name__ == '__main__':
     server = RestAiServer(
         agents=[
-            AgentExample(agent_id='agent1'),  # replace with your agent id
+            AgentExample(
+                agent_id='10209b93-2dd0-47a0-8eb2-33fb018a783b'  # replace with your agent id
+            ),
         ],
         knowledge_bases=[
-            KnowledgeBaseExample(knowledge_base_id='kb1'),  # replace with your knowledge base id
+            KnowledgeBaseExample(
+                knowledge_base_id='85bc1c72-b8e0-4042-abcf-8eb2d478f207'  # replace with your knowledge base id
+            ),
         ],
         port=5000
     )
