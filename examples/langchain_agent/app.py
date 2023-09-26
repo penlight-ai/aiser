@@ -4,7 +4,6 @@ import asyncio
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import HumanMessage
-from dotenv import load_dotenv
 from aiser import RestAiServer, Agent
 from aiser.models import ChatMessage
 
@@ -28,9 +27,16 @@ class CustomCallbackHandler(BaseCallbackHandler):
             await asyncio.sleep(0.05)
 
 
-class AgentExample(Agent):
-    def __init__(self, openai_api_key: str, model_name: str):
-        super().__init__()
+class PromptBasedAgent(Agent):
+    def __init__(
+            self,
+            agent_id: str,
+            starting_prompt: str,
+            openai_api_key: str,
+            model_name: str,
+    ):
+        super().__init__(agent_id=agent_id)
+        self._starting_prompt = starting_prompt
         self._openai_api_key = openai_api_key
         self._model_name = model_name
 
@@ -64,10 +70,7 @@ class AgentExample(Agent):
 
     def _make_model_input(self, messages: typing.List[ChatMessage]) -> str:
         starting_message = ChatMessage(
-            text_content='''
-You are Opposite Agent. Whenever you receive a message from the user, you should reply with the opposite of that message.
-Don't reply with anything other than the exact opposite of the user's message.
-''',
+            text_content=self._starting_prompt
         )
         messages_combined = [starting_message] + list(messages)
         return self._messages_to_single_str(messages_combined)
@@ -90,15 +93,35 @@ if __name__ == '__main__':
     # Duplicate the file sample.env and rename it to .env then fill in the values in the .env file.
     # Set the environment variable AISER_ENVIRONMENT to "Development" only for local development.
     # Otherwise, you can leave it empty or set it to "Production"
+    from dotenv import load_dotenv
+
     load_dotenv()
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+    opposites_agent = PromptBasedAgent(
+        agent_id='8d4ac909-ce3e-48c6-8233-63fa21da5b23',  # replace this with your agent id
+        starting_prompt='''
+                You are Opposite Agent. Whenever you receive a message from the user, 
+                you should reply with the opposite of that message.
+                Don't reply with anything other than the exact opposite of the user's message.
+                ''',
+        openai_api_key=OPENAI_API_KEY,
+        model_name='gpt-3.5-turbo'
+    )
+
+    general_assistant_agent = PromptBasedAgent(
+        agent_id='4b4b4bad-bdde-4cba-9170-ac8ae11d994a',  # replace this with your agent id
+        starting_prompt='''
+            You are a friendly and helpful AI assistant.
+            ''',
+        openai_api_key=OPENAI_API_KEY,
+        model_name='gpt-3.5-turbo'
+    )
+
     server = RestAiServer(
         agents=[
-            AgentExample(
-                openai_api_key=OPENAI_API_KEY,
-                model_name='gpt-3.5-turbo'
-            ),
+            opposites_agent
+            ,
         ],
         port=5000
     )
