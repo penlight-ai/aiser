@@ -120,8 +120,8 @@ if __name__ == '__main__':
 
     server = RestAiServer(
         agents=[
-            opposites_agent
-            ,
+            opposites_agent,
+            general_assistant_agent
         ],
         port=5000
     )
