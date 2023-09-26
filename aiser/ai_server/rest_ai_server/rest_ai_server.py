@@ -11,7 +11,6 @@ from aiser.ai_server.authentication import (
     RestAuthenticator
 )
 from aiser.config.ai_server_config import ServerEnvironment
-from aiser.job_management import AsyncStartJob
 from aiser.models.dtos import (
     SemanticSearchRequest,
     AgentChatRequest,
@@ -26,15 +25,6 @@ from aiser.knowledge_base import KnowledgeBase
 from aiser.agent import Agent
 from aiser.config import AiServerConfig
 from aiser.utils import meets_minimum_version
-
-
-class AgentChatJob(AsyncStartJob):
-    def __init__(self, agent_chat_request: AgentChatRequest):
-        super().__init__(creation_timestamp=time.time())
-        self._agent_chat_request = agent_chat_request
-
-    def get_agent_chat_request(self) -> AgentChatRequest:
-        return self._agent_chat_request
 
 
 class RestAiServer(AiServer):
