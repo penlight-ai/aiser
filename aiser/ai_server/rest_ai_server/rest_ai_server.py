@@ -56,7 +56,7 @@ class RestAiServer(AiServer):
             consumer=self._config.consumer,
         )
 
-    def _get_app(self) -> FastAPI:
+    def get_app(self) -> FastAPI:
         verify_token = self._authenticator.get_authentication_dependency(
             acceptable_subjects=self._get_list_of_identifiable_entity_ids()
         )
@@ -136,4 +136,4 @@ class RestAiServer(AiServer):
         return app
 
     def run(self):
-        uvicorn.run(app=self._get_app(), port=self._port, host=self._host)
+        uvicorn.run(app=self.get_app(), port=self._port, host=self._host)
