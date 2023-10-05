@@ -35,6 +35,7 @@ class RestAiServer(AiServer):
             agents: typing.Optional[typing.List[Agent]] = None,
             host: str = "127.0.0.1",
             port: int = 5000,
+            workers: typing.Optional[int] = None,
             config: typing.Optional[AiServerConfig] = None,
             authenticator: typing.Optional[RestAuthenticator] = None
     ):
@@ -46,6 +47,7 @@ class RestAiServer(AiServer):
             port=port,
             config=config
         )
+        self._workers = workers
         self._authenticator = authenticator or self._determine_authenticator_fallback()
 
     def _determine_authenticator_fallback(self) -> RestAuthenticator:
@@ -136,4 +138,4 @@ class RestAiServer(AiServer):
         return app
 
     def run(self):
-        uvicorn.run(app=self.get_app(), port=self._port, host=self._host)
+        uvicorn.run(app=self.get_app(), port=self._port, host=self._host, workers=self._workers or 1)
